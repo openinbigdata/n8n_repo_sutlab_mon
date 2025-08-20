@@ -1,0 +1,237 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "MySQL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL1": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-07-29T20:27:42.159Z",
+  "id": "ZEgCulKYXYc7BhmY",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Carga inicial de erros conhecidos - Latest",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        -20
+      ],
+      "id": "8dcb3589-e5da-448d-8c74-fd875006baaf",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "erros_conhecidos",
+          "mode": "list",
+          "cachedResultName": "erros_conhecidos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "seguradora": "={{ $json.seguradora }}",
+            "erro": "={{ $json.razao_status }}",
+            "movimento": "={{ $json.movimento }}",
+            "processo": "={{ $json.processo }}",
+            "etapa": "={{ $json.etapa }}",
+            "status": "={{ $json.status }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "movimento",
+              "displayName": "movimento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processo",
+              "displayName": "processo",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seguradora",
+              "displayName": "seguradora",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "etapa",
+              "displayName": "etapa",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "erro",
+              "displayName": "erro",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data_criacao",
+              "displayName": "data_criacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -280,
+        -20
+      ],
+      "id": "e0781b68-049b-499e-8457-022ba74e764b",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "P09H1er9n2eb0uAq",
+          "name": "Postgres Sutlab Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Nota\nEsse fluxo gera a carga inicial de erros conhecidos para servir de referencia para o tratamento dos erros não conhecidos"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -760,
+        -220
+      ],
+      "typeVersion": 1,
+      "id": "dc2ae6aa-5c6f-45ee-a770-774bf5354e40",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT\n'Movimentos transacionais' as movimento,\n'Adesão' as processo,\nCASE\n\tWHEN mt.id_seguradora = 672 THEN 'Zurich'\n\tWHEN mt.id_seguradora = 671 THEN 'Cardif'\nEND as seguradora,\nmt.etapa,\nmt.status,  \nREGEXP_REPLACE(\n    REGEXP_REPLACE(\n      REGEXP_REPLACE(\n        REGEXP_REPLACE(\n          mt.razao_status,\n          '(\"timestamp\"\\\\s*:\\\\s*\")[0-9]{4}-[0-9]{2}-[0-9]{2}\\\\s[0-9]{2}:[0-9]{2}:[0-9]{2}(\")',\n          '\\\\1***\\\\2'\n        ),\n        '([0-9]{11})',\n        '***'\n      ),\n      '(CEP\\\\s+)([0-9]{8})',\n      '\\\\***'\n    ),\n    '([0-9]{1,3})\\\\s+anos',\n    '*** anos'\n  ) AS razao_status\nFROM\n  `core-data-streams-prod-database`.movimentos_transacionais mt\nWHERE\n  mt.etapa in (\n  \t'adesao_csf_sut', \n  \t'adesao_seg_status', \n  \t'adesao_seg_subscr_sut',\n  \t'adesao_seg_sut',\n  \t'adesao_suthub_seguradora',\n  \t'adesao_sut_seg',\n  \t'adesao_sut_subscr_seg'\n  \t)\n  AND mt.id_seguradora in (671, 672)\n  AND mt.razao_status is not null;",
+        "options": {
+          "replaceEmptyStrings": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -520,
+        -20
+      ],
+      "id": "86defd33-25dc-4280-a0ad-1133d18bb10f",
+      "name": "MySQL1",
+      "credentials": {
+        "mySql": {
+          "id": "5YkbRXBaQCU0hyQs",
+          "name": "MySQL Mon"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-07-29T17:22:58.627Z",
+      "updatedAt": "2025-07-29T17:22:58.627Z",
+      "id": "IWuR2gsUJATZtiw5",
+      "name": "latest"
+    },
+    {
+      "createdAt": "2025-07-29T17:32:50.846Z",
+      "updatedAt": "2025-07-29T17:32:50.846Z",
+      "id": "fQHqEjQmqqubgutx",
+      "name": "monitoramento"
+    },
+    {
+      "createdAt": "2025-07-29T17:33:00.368Z",
+      "updatedAt": "2025-07-29T17:33:00.368Z",
+      "id": "Fn3RtlQfZGMdTm58",
+      "name": "prod"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-06T18:49:37.712Z",
+  "versionId": "1aa90971-0201-458a-b4e4-1267f9e83f35"
+}
