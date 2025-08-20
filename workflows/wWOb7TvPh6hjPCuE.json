@@ -1,0 +1,891 @@
+{
+  "active": true,
+  "connections": {
+    "MySQL - Lê erros da última hora": {
+      "main": [
+        [
+          {
+            "node": "Escapando aspas simples na msg de erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escapando aspas simples na msg de erro": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Variables": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Lê erros da última hora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Erro conhecido?": {
+      "main": [
+        [
+          {
+            "node": "Conhecido ou desconhecido?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Hash do erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash do erro": {
+      "main": [
+        [
+          {
+            "node": "Erro conhecido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica se há ticket": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Incluindo ação em ticket aberto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criando ticket para erro conhecido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica se há ticket - desconhecido": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Criando ticket para erro desconhecido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criando ticket para erro desconhecido": {
+      "main": [
+        [
+          {
+            "node": "Carrega erro desconhecido1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conhecido ou desconhecido?1": {
+      "main": [
+        [
+          {
+            "node": "Verifica se há ticket - desconhecido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quatidade > ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quatidade > ": {
+      "main": [
+        [
+          {
+            "node": "Verifica se há ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-08-15T18:18:13.521Z",
+  "id": "wWOb7TvPh6hjPCuE",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Monitoramento CSF: Adesao Erros - Latest",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n\t'Movimentos transacionais' as movimento,\n\t'Adesão' as processo, \n\tCASE\n\t\tWHEN mt.id_seguradora = 672 THEN 'Zurich'\n\t\tWHEN mt.id_seguradora = 671 THEN 'Cardif'\n\tEND as seguradora,\n\tmt.etapa, \n\tmt.status,  \t\n    REGEXP_REPLACE(\n      REGEXP_REPLACE(\n        REGEXP_REPLACE(\n          REGEXP_REPLACE(\n            mt.razao_status,'(\"timestamp\"\\\\s*:\\\\s*\")[0-9]{4}-[0-9]{2}-[0-9]{2}\\\\s[0-9]{2}:[0-9]{2}:[0-9]{2}(\")',\n            '\\\\1***\\\\2'\n          ),\n          '([0-9]{11})',\n          '***'\n        ),\n        '(CEP\\\\s+)([0-9]{8})',\n        '\\\\***'\n      ),\n      '([0-9]{1,3})\\\\s+anos',\n      '*** anos'\n    ) AS razao,\n\tcount(*) as quantidade_erros  \nFROM\n  `core-data-streams-prod-database`.movimentos_transacionais mt\nWHERE 1=1\n  AND mt.id_seguradora in (671, 672)\n  AND (\n  \ttrim(mt.razao_status) <> '' \n  \tand trim(mt.razao_status) is not null \n  \tand trim(mt.razao_status) <> 'emitido'\n  \tand trim(mt.razao_status) <> 'em processamento'\n  \t)\n  AND mt.timestamp_processamento >= NOW() - INTERVAL 1 HOUR\ngroup by\n\t1, 2, 3, 4, 5, 6\norder by\n\t7 desc;",
+        "options": {
+          "replaceEmptyStrings": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -1740,
+        -980
+      ],
+      "id": "4dea348f-3ccf-4d75-a257-9bd9f99ed2e1",
+      "name": "MySQL - Lê erros da última hora",
+      "credentials": {
+        "mySql": {
+          "id": "5YkbRXBaQCU0hyQs",
+          "name": "MySQL Mon"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2120,
+        -720
+      ],
+      "id": "c4312b7b-b005-436b-868a-308dc2dca997",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Pega o valor de 'razao', que pode ser qualquer coisa.\nconst textoOriginal = item.json.razao;\n\n// Garante que estamos trabalhando com uma string, tratando casos de nulo/indefinido.\nconst textoComoString = String(textoOriginal || '');\n\n// --- Início da Neutralização Universal ---\n\nconst textoSeguro = textoComoString\n  .replace(/\\\\/g, '\\\\\\\\') // 1. Primeiro, escapa todas as barras invertidas.\n  .replace(/\"/g, '\\\\\"')  // 2. Depois, escapa todas as aspas duplas.\n  .replace(/(\\r\\n|\\n|\\r)/g, ' \\\\n '); // 3. Troca quebras de linha por um texto literal para manter a legibilidade.\n\n// --- Fim da Neutralização ---\nconst quantidade_erros_source = item.json.quantidade_erros;\n\n// Adiciona o texto seguro a um novo campo para ser usado no corpo do ticket\nitem.json.razao_segura_para_json = textoSeguro;\n\n// (Opcional) Mantém o seu código para o SQL, que já é robusto\nconst erroParaSql = textoComoString.replace(/'/g, \"''\");\nitem.json.erro_sql = erroParaSql;\nitem.json.quantidade_erros_source = quantidade_erros_source;\n\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1540,
+        -980
+      ],
+      "id": "d2a9e4f2-ad3a-4291-8085-31ffb5374da1",
+      "name": "Escapando aspas simples na msg de erro"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29491a57-83b9-4c1d-80d6-ade7a5dea775",
+              "name": "email_movedesk",
+              "value": "atendimento@sutservices-solucoes-em-tecnologia-ltda.movidesk.com",
+              "type": "string"
+            },
+            {
+              "id": "e4424b08-f73a-47cc-94e8-98497b7c40e9",
+              "name": "threshould_conhecido",
+              "value": 10,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1940,
+        -980
+      ],
+      "id": "dc5b8266-d3f1-4b37-a4ed-be2550b56422",
+      "name": "Variables"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2140,
+        -980
+      ],
+      "id": "f29c098a-867f-466d-8e0a-4d00f2784bdf",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select \n  '{{ $json.movimento }}' as movimento,\n  '{{ $json.processo }}' as processo,\n  '{{ $json.seguradora }}'as seguradora,\n  '{{ $json.etapa }}' as etapa,\n  '{{ $json.status }}' as status,\n  '{{ $json.erro_sql }}' as erro,\n  {{ $json.quantidade_erros_source }} as quantidade_erros_source,\n  count(*) as quantidade_erros,\n  '{{ $json.hash_do_erro }}' as hash_do_erro  \nfrom \n  public.erros_conhecidos ec \nwhere \n  ec.movimento = '{{ $json.movimento }}'\n  and ec.processo = '{{ $json.processo }}'\n  and ec.seguradora = '{{ $json.seguradora }}'\n  and ec.etapa = '{{ $json.etapa }}'\n  and ec.status = '{{ $json.status }}'\n  and ec.erro = '{{ $json.erro_sql }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -880,
+        -980
+      ],
+      "id": "cd593f56-f19c-44eb-ae27-ddfff9d254f8",
+      "name": "Erro conhecido?",
+      "credentials": {
+        "postgres": {
+          "id": "P09H1er9n2eb0uAq",
+          "name": "Postgres Sutlab Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e17e16fd-35a8-4019-a56c-779ec585eb3a",
+              "name": "dadosParaHash",
+              "value": "={{ $json.movimento }}|{{ $json.processo }}|{{ $json.seguradora }}|{{ $json.etapa }}|{{ $json.status }}|{{ $json.razao }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1320,
+        -980
+      ],
+      "id": "374de2e1-1db7-409a-9291-46802066bfbc",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "value": "={{ $json.dadosParaHash }}",
+        "dataPropertyName": "hash_do_erro"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        -1100,
+        -980
+      ],
+      "id": "5afdbc00-e52d-4d89-b2e6-5d453e04c672",
+      "name": "Hash do erro"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "$filter",
+              "value": "=actions/any(a: contains(a/description, '{{ $json.hash_do_erro }}'))"
+            },
+            {
+              "name": "$select",
+              "value": "id,status,baseStatus"
+            },
+            {
+              "name": "$top",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        -820
+      ],
+      "id": "68d24f73-5a18-49f1-b307-c956f88fcc8c",
+      "name": "Verifica se há ticket",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.baseStatus }}",
+                    "rightValue": "New|Stopped|InAttendance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "regex"
+                    },
+                    "id": "b6dba3fe-2cec-42cd-9ccc-5e385d3bd5cc"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Aberto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b23b6676-15e0-4a9e-b7af-8e99c1684858",
+                    "leftValue": "={{ $json.baseStatus }}",
+                    "rightValue": "New|Stopped|InAttendance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notRegex"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Fechado"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -140,
+        -820
+      ],
+      "id": "650ffcc7-0d93-4a4b-833c-96a8f95074d4",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "$filter",
+              "value": "=actions/any(a: contains(a/description, '{{ $('Conhecido ou desconhecido?1').item.json.hash_do_erro }}'))"
+            },
+            {
+              "name": "$select",
+              "value": "id,status,baseStatus"
+            },
+            {
+              "name": "$top",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -460,
+        -1140
+      ],
+      "id": "5d9da574-07e2-457e-b182-339b42a1adc8",
+      "name": "Verifica se há ticket - desconhecido",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a109c99a-799f-45f5-852f-e5e002a01d5b",
+                    "leftValue": "={{ $json.baseStatus }}",
+                    "rightValue": "New|Stopped|InAttendance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notRegex"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NTem"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -240,
+        -1140
+      ],
+      "id": "91a39670-4914-4b95-9de6-6f589b32a0fd",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"type\": 2,\n    \"subject\": \"Sutlab Mon - Erros desconhecidos: {{ $('Conhecido ou desconhecido?1').item.json.processo }}\",\n    \"category\": \"Problema\",\n    \"serviceFirstLevelId\": 1351440,\n    \"createdBy\": {\n        \"id\": \"70003777\"\n    },\n    \"clients\": [\n        {\n            \"id\": \"887430515\"\n        }\n    ],\n    \"actions\": [\n        {\n            \"type\": 2,\n            \"description\": \"Foi detectado na última hora em \\\"Adesão CSF - Conciliação\\\", um erro desconhecido.<br><br><b>Processo:</b> {{ $('Conhecido ou desconhecido?1').item.json.processo }}<br><b>Seguradora:</b> {{ $('Conhecido ou desconhecido?1').item.json.seguradora }}<br><b>Etapa:</b> {{ $('Conhecido ou desconhecido?1').item.json.etapa }}<br><b>Erro:</b> {{ $('Hash do erro').item.json.razao_segura_para_json }}<br><b>Quantidade:</b> {{ $('Conhecido ou desconhecido?1').item.json.quantidade_erros_source }}<br><b>Pesquisa:</b> {{ $('Conhecido ou desconhecido?1').item.json.hash_do_erro }}<br><br><hr><small><i>Developer by Data Team<br>Created: 2025-07-31<br>Updated: 2025-07-31</i></small>\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        -1240
+      ],
+      "id": "f78a3480-444a-48f1-b1dc-f608270693b6",
+      "name": "Criando ticket para erro desconhecido"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "id",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"actions\": [\n    {\n      \"type\": 2,\n      \"description\": \"Foi detectado na última hora em \\\"Adesão CSF - Conciliação\\\", um erro conhecido.<br><br><b>Processo:</b> {{ $('Conhecido ou desconhecido?1').item.json.processo }}<br><b>Seguradora:</b> {{ $('Conhecido ou desconhecido?1').item.json.seguradora }}<br><b>Etapa:</b> {{ $('Conhecido ou desconhecido?1').item.json.etapa }}<br><b>Erro:</b> {{ $('Hash do erro').item.json.razao_segura_para_json }}<br><b>Quantidade:</b> {{ $('Conhecido ou desconhecido?1').item.json.quantidade_erros_source }}<br><b>Pesquisa:</b> {{ $('Conhecido ou desconhecido?1').item.json.hash_do_erro }}<br><br><hr><small><i>Developer by Data Team<br>Created: 2025-07-31<br>Updated: 2025-07-31</i></small>\",\n      \"createdBy\": {\n        \"id\": \"70003777\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        120,
+        -940
+      ],
+      "id": "c80cb1bb-5388-4874-a995-4cd31eacaa5c",
+      "name": "Incluindo ação em ticket aberto"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"type\": 2,\n    \"subject\": \"Sutlab Mon - Erros conhecidos: {{ $('Conhecido ou desconhecido?1').item.json.processo }}\",\n    \"category\": \"Problema\",\n    \"serviceFirstLevelId\": 1351440,\n    \"createdBy\": {\n        \"id\": \"70003777\"\n    },\n    \"clients\": [\n        {\n            \"id\": \"887430515\"\n        }\n    ],\n    \"actions\": [\n        {\n            \"type\": 2,\n            \"description\": \"Foi detectado na última hora em \\\"Adesão CSF - Conciliação\\\", um erro conhecido.<br><br><b>Processo:</b> {{ $('Conhecido ou desconhecido?1').item.json.processo }}<br><b>Seguradora:</b> {{ $('Conhecido ou desconhecido?1').item.json.seguradora }}<br><b>Etapa:</b> {{ $('Conhecido ou desconhecido?1').item.json.etapa }}<br><b>Erro: {{ $('Hash do erro').item.json.razao_segura_para_json }}</b> <br><b>Quantidade:</b> {{ $('Conhecido ou desconhecido?1').item.json.quantidade_erros_source }}<br><b>Pesquisa:</b> {{ $('Conhecido ou desconhecido?1').item.json.hash_do_erro }}<br><br><hr><small><i>Developer by Data Team<br>Created: 2025-07-31<br>Updated: 2025-07-31</i></small>\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        120,
+        -720
+      ],
+      "id": "400fed7c-3a1e-45e4-b3e9-2a126b4aa2c5",
+      "name": "Criando ticket para erro conhecido"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.quantidade_erros }}",
+                    "rightValue": "0",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9e642630-ab98-4119-aaeb-59750ba054e1"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Desconhecido"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "325efd98-4437-4deb-9daa-1af5811fe072",
+                    "leftValue": "={{ $json.quantidade_erros }}",
+                    "rightValue": "0",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Conhecido"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -680,
+        -980
+      ],
+      "id": "4cca8d6f-9bb9-4408-8200-a5a3bb415f0f",
+      "name": "Conhecido ou desconhecido?1"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "erros_conhecidos",
+          "mode": "list",
+          "cachedResultName": "erros_conhecidos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "seguradora": "={{ $('Erro conhecido?').item.json.seguradora }}",
+            "erro": "={{ $('Erro conhecido?').item.json.erro }}",
+            "movimento": "={{ $('Conhecido ou desconhecido?1').item.json.movimento }}",
+            "processo": "={{ $('Conhecido ou desconhecido?1').item.json.processo }}",
+            "etapa": "={{ $('Conhecido ou desconhecido?1').item.json.etapa }}",
+            "status": "={{ $('Conhecido ou desconhecido?1').item.json.status }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "movimento",
+              "displayName": "movimento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processo",
+              "displayName": "processo",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seguradora",
+              "displayName": "seguradora",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "etapa",
+              "displayName": "etapa",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "erro",
+              "displayName": "erro",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data_criacao",
+              "displayName": "data_criacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        320,
+        -1240
+      ],
+      "id": "0baa268d-ba35-41c4-9f9e-88d57f8d4e44",
+      "name": "Carrega erro desconhecido1",
+      "credentials": {
+        "postgres": {
+          "id": "P09H1er9n2eb0uAq",
+          "name": "Postgres Sutlab Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "549aa180-f02d-4df1-9b32-618c7d431405",
+              "leftValue": "={{ $json.quantidade_erros_source }}",
+              "rightValue": "={{ $('Variables').item.json.threshould_conhecido }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -500,
+        -820
+      ],
+      "id": "da5ffc7f-f0aa-450d-ab14-8d7be444e7e2",
+      "name": "Quatidade > "
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "tags": [
+    {
+      "createdAt": "2025-07-29T17:22:58.627Z",
+      "updatedAt": "2025-07-29T17:22:58.627Z",
+      "id": "IWuR2gsUJATZtiw5",
+      "name": "latest"
+    },
+    {
+      "createdAt": "2025-07-29T17:32:50.846Z",
+      "updatedAt": "2025-07-29T17:32:50.846Z",
+      "id": "fQHqEjQmqqubgutx",
+      "name": "monitoramento"
+    },
+    {
+      "createdAt": "2025-07-29T17:33:00.368Z",
+      "updatedAt": "2025-07-29T17:33:00.368Z",
+      "id": "Fn3RtlQfZGMdTm58",
+      "name": "prod"
+    },
+    {
+      "createdAt": "2025-07-31T18:18:44.803Z",
+      "updatedAt": "2025-07-31T18:18:44.803Z",
+      "id": "yffj8p12BK5O1xLr",
+      "name": "schedule"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-08-19T11:54:22.847Z",
+  "versionId": "d0622286-7ae2-4932-81f1-c01a925ac71f"
+}
