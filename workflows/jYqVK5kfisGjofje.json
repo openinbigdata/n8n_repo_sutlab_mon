@@ -1,0 +1,589 @@
+{
+  "active": true,
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "seg_sut_pendente_seg": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "sut_seg_pendente_suthub": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "seg_sut_pendente_consulta": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Maior que 86400 seg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Hash do erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Maior que 86400 seg": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash do erro": {
+      "main": [
+        [
+          {
+            "node": "Pesquisa hash em tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pesquisa hash em tickets": {
+      "main": [
+        [
+          {
+            "node": "Tem tickets aberto?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem tickets aberto?": {
+      "main": [
+        [
+          {
+            "node": "Cria ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Incluindo ação em ticket aberto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cria ticket": {
+      "main": [
+        []
+      ]
+    },
+    "Variables": {
+      "main": [
+        [
+          {
+            "node": "sut_seg_pendente_suthub",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "seg_sut_pendente_consulta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "seg_sut_pendente_seg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-08-12T18:14:25.714Z",
+  "id": "jYqVK5kfisGjofje",
+  "isArchived": false,
+  "meta": null,
+  "name": "Monitoramento CSF: Adesao Fila 24h - Latest",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        240
+      ],
+      "id": "59816adb-2a07-427f-bbfb-87bcd6a83b43",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- etapa = 'adesao_sut_seg'\n-- status = 'pendente suthub'\nSELECT \n    *,\n  \t'Movimentos transacionais' as movimento,\n\t'Adesão' as processo,   \n    ROUND(TIMESTAMPDIFF(SECOND,DATE_SUB(mt.timestamp_processamento, INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR)), 2) AS diferenca_segundos\nFROM `core-data-streams-prod-database`.movimentos_transacionais mt\nWHERE\n    mt.id_seguradora = 672 -- Zurich\n    AND mt.etapa = 'adesao_sut_seg'\n    AND mt.status = 'pendente suthub'\nORDER BY timestamp_processamento DESC\nLIMIT 1;",
+        "options": {
+          "replaceEmptyStrings": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -780,
+        -220
+      ],
+      "id": "624a8ad9-2e03-4837-92cf-6f67430a4b58",
+      "name": "sut_seg_pendente_suthub",
+      "credentials": {
+        "mySql": {
+          "id": "5YkbRXBaQCU0hyQs",
+          "name": "MySQL Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- etapa = 'adesao_seg_sut'\n-- status = 'pendente_consulta'\nSELECT \n    *,\n  \t'Movimentos transacionais' as movimento,\n\t'Adesão' as processo,   \n    ROUND(TIMESTAMPDIFF(SECOND,DATE_SUB(mt.timestamp_processamento, INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR)), 2) AS diferenca_segundos\nFROM `core-data-streams-prod-database`.movimentos_transacionais mt\nWHERE\n    mt.id_seguradora = 672 -- Zurich\n    AND mt.etapa = 'adesao_seg_sut'\n    AND mt.status = 'pendente_consulta'\nORDER BY timestamp_processamento DESC\nLIMIT 1;",
+        "options": {
+          "replaceEmptyStrings": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -780,
+        -20
+      ],
+      "id": "c31c0cc7-2efb-4e86-b593-11df568cc7af",
+      "name": "seg_sut_pendente_consulta",
+      "credentials": {
+        "mySql": {
+          "id": "5YkbRXBaQCU0hyQs",
+          "name": "MySQL Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- etapa = 'adesao_seg_sut'\n-- status = 'pendente_seg'\nSELECT \n    *,\n    'Movimentos transacionais' as movimento,\n\t'Adesão' as processo, \n    ROUND(TIMESTAMPDIFF(SECOND,DATE_SUB(mt.timestamp_processamento, INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR)), 2) AS diferenca_segundos\nFROM `core-data-streams-prod-database`.movimentos_transacionais mt\nWHERE\n    mt.id_seguradora = 672 -- Zurich\n    AND mt.etapa = 'adesao_seg_sut'\n    AND mt.status = 'pendente_seg'\nORDER BY timestamp_processamento DESC\nLIMIT 1;",
+        "options": {
+          "replaceEmptyStrings": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -780,
+        200
+      ],
+      "id": "66237d2f-bd36-44c0-8cad-269aa372c519",
+      "name": "seg_sut_pendente_seg",
+      "credentials": {
+        "mySql": {
+          "id": "5YkbRXBaQCU0hyQs",
+          "name": "MySQL Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -500,
+        -20
+      ],
+      "id": "de4115c4-9156-4da3-b57d-5e6f530f9aa3",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e17e16fd-35a8-4019-a56c-779ec585eb3a",
+              "name": "dadosParaHash",
+              "value": "={{ $json.movimento }}|{{ $json.processo }}|{{ $json.id_seguradora }}|{{ $json.etapa }}|{{ $json.status }}|{{ $json.razao_status }}",
+              "type": "string"
+            },
+            {
+              "id": "dbecd645-877b-4aae-a8fe-72af2eea49bd",
+              "name": "timestamp_processamento",
+              "value": "={{ DateTime.fromSQL($json.timestamp_processamento).minus({ hours: 3 }).toFormat('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        -20
+      ],
+      "id": "cc99d745-b7dc-4a3e-bbb5-df3b172c190c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "value": "={{ $json.dadosParaHash }}",
+        "dataPropertyName": "hash_do_erro"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        120,
+        -20
+      ],
+      "id": "a5de0a80-9737-4841-8b20-5a6d0460e8c8",
+      "name": "Hash do erro"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9babe47e-460d-4ee0-ba87-f9f0ae25a581",
+              "leftValue": "={{ $json.diferenca_segundos }}",
+              "rightValue": "={{ $('Variables').item.json.threshould_file }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -280,
+        -20
+      ],
+      "id": "25a9ebe5-acb9-4e9e-8600-63933c369ae1",
+      "name": "Maior que 86400 seg"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "$filter",
+              "value": "=actions/any(a: contains(a/description, '{{ $json.hash_do_erro }}'))"
+            },
+            {
+              "name": "$select",
+              "value": "id,status,baseStatus"
+            },
+            {
+              "name": "$top",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        340,
+        -20
+      ],
+      "id": "30110e76-bea3-449f-98b5-30a4dd74f299",
+      "name": "Pesquisa hash em tickets",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a109c99a-799f-45f5-852f-e5e002a01d5b",
+                    "leftValue": "={{ $json.baseStatus }}",
+                    "rightValue": "New|Stopped|InAttendance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notRegex"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NTem"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "07ed0234-71a7-4701-957a-c53c6c3b306c",
+                    "leftValue": "={{ $json.baseStatus }}",
+                    "rightValue": "New|Stopped|InAttendance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "regex"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Tem"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        560,
+        -20
+      ],
+      "id": "aa240b34-4882-4724-9bbf-33d82e03f9de",
+      "name": "Tem tickets aberto?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"type\": 2,\n    \"subject\": \"Sutlab Mon - {{ $('Hash do erro').item.json.processo }} CSF - Fila 24h\",\n    \"category\": \"Problema\",\n    \"serviceFirstLevelId\": 1351440,\n    \"createdBy\": {\n        \"id\": \"70003777\"\n    },\n    \"clients\": [\n        {\n            \"id\": \"887430515\"\n        }\n    ],\n    \"actions\": [\n        {\n            \"type\": 2,\n            \"description\": \"Foi detectado na última hora em \\\"Adesão CSF - Conciliação\\\", possui contrato pendente a mais de 36 horas.<br><br><b>Processo:</b> {{ $('Hash do erro').item.json.processo }}<br><b>Seguradora:</b> Zurich<br><b>Etapa:</b> {{ $('Hash do erro').item.json.etapa }}<br><b>Status:</b> {{ $('Hash do erro').item.json.status }}<br><b>Último movimento:</b> {{ $('Hash do erro').item.json.timestamp_processamento }}<br><b>Pesquisa:</b> {{ $('Hash do erro').item.json.hash_do_erro }}<br><br><hr><small><i>Developer by Data Team<br>Created: 2025-08-12<br>Updated: 2025-08-12</i></small>\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        -140
+      ],
+      "id": "5c82d558-9fdb-4940-8b1a-9f967b2b06b0",
+      "name": "Cria ticket"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "id",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"actions\": [\n    {\n      \"type\": 2,\n      \"description\": \"Foi detectado na última hora em \\\"Adesão CSF - Conciliação\\\", possui contrato pendente a mais de 36 horas.<br><br><b>Processo:</b> {{ $('Hash do erro').item.json.processo }}<br><b>Seguradora:</b> Zurich<br><b>Etapa:</b> {{ $('Hash do erro').item.json.etapa }}<br><b>Status:</b> {{ $('Hash do erro').item.json.status }}<br><b>Último movimento:</b> {{ $('Hash do erro').item.json.timestamp_processamento }}<br><b>Pesquisa:</b> {{ $('Hash do erro').item.json.hash_do_erro }}<br><br><hr><small><i>Developer by Data Team<br>Created: 2025-08-12<br>Updated: 2025-08-12</i></small>\",\n      \"createdBy\": {\n        \"id\": \"70003777\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        100
+      ],
+      "id": "e173c23b-2930-48b3-ab41-17d393a827be",
+      "name": "Incluindo ação em ticket aberto"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e4424b08-f73a-47cc-94e8-98497b7c40e9",
+              "name": "threshould_file",
+              "value": 253800,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1080,
+        -20
+      ],
+      "id": "26817b1d-d9f9-46a2-bc64-3727990755de",
+      "name": "Variables"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1320,
+        -20
+      ],
+      "id": "cdbba3a2-4985-4289-b8f0-fbb8567cbfe9",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "tags": [
+    {
+      "createdAt": "2025-07-29T17:33:00.368Z",
+      "updatedAt": "2025-07-29T17:33:00.368Z",
+      "id": "Fn3RtlQfZGMdTm58",
+      "name": "prod"
+    },
+    {
+      "createdAt": "2025-07-31T18:18:44.803Z",
+      "updatedAt": "2025-07-31T18:18:44.803Z",
+      "id": "yffj8p12BK5O1xLr",
+      "name": "schedule"
+    },
+    {
+      "createdAt": "2025-07-29T17:22:58.627Z",
+      "updatedAt": "2025-07-29T17:22:58.627Z",
+      "id": "IWuR2gsUJATZtiw5",
+      "name": "latest"
+    },
+    {
+      "createdAt": "2025-07-29T17:32:50.846Z",
+      "updatedAt": "2025-07-29T17:32:50.846Z",
+      "id": "fQHqEjQmqqubgutx",
+      "name": "monitoramento"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-08-19T11:57:54.076Z",
+  "versionId": "80b61ea2-b5d7-4df4-8ae9-a1d00f708de5"
+}
