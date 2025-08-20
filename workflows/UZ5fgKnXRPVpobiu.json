@@ -1,0 +1,93 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-08-06T20:24:06.815Z",
+  "id": "UZ5fgKnXRPVpobiu",
+  "isArchived": false,
+  "meta": null,
+  "name": "test_add_actions",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        280,
+        -460
+      ],
+      "id": "b5f5a4dd-3a7a-4949-a2e9-0b26da39227e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "content": "## POST: Incluir uma ação em ticket já existente em /tickets",
+        "height": 280,
+        "width": 680
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "772a890c-e062-4ec9-b171-87d28e2ec138",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.movidesk.com/public/v1/tickets/822/actions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"type\": 2,\n    \"description\": \"<h3>Atualização do Andamento</h3><p>Esta é uma nova ação adicionada via API. O cliente será notificado.</p>\",\n    \"origin\": 9\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        -440
+      ],
+      "id": "bc290e38-e03a-40f4-8121-243aef550d95",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "H10CyxKjzynbTVVf",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-07T17:44:48.982Z",
+  "versionId": "cd04b78c-3d39-4e34-a81b-81a373b64a93"
+}
