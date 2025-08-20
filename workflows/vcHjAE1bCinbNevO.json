@@ -1,0 +1,486 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "createdAt": "2025-08-05T18:15:26.272Z",
+  "id": "vcHjAE1bCinbNevO",
+  "isArchived": false,
+  "meta": null,
+  "name": "tools - interact movidesk",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -360
+      ],
+      "id": "d2052b20-466e-4ec2-9f59-ca677b989be4",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        -480
+      ],
+      "id": "48fd33be-c6e0-421c-a2f4-b162876c13f1",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "content": "## Só conectando",
+        "height": 280,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "b50ff912-d2e8-43d5-b679-a30b6fd0717c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## GET: Select e Expand em /tickets e Filter em /persons",
+        "height": 280,
+        "width": 1180
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -260
+      ],
+      "typeVersion": 1,
+      "id": "41c7b7ac-2220-46c7-bc6d-e3258aea25d7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"type\": 2,\n    \"subject\": \"DEV Assunto do Ticket (Versão Corrigida)\",\n    \"createdBy\": {\n        \"id\": \"887430515\"\n    },\n    \"clients\": [\n        {\n            \"id\": \"887430515\"\n        }\n    ],\n    \"actions\": [\n        {\n            \"type\": 2,\n            \"description\": \"DEV Descrição inicial do problema ou solicitação.\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        140
+      ],
+      "id": "cb2a588b-d23e-4fdf-92ee-3541cffd5c79",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "$expand",
+              "value": "createdBy,clients"
+            },
+            {
+              "name": "$select",
+              "value": "id,subject,createdBy,clients"
+            },
+            {
+              "name": "$top",
+              "value": "5"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        380,
+        -180
+      ],
+      "id": "bc7a410a-4e8e-417a-93eb-7cd16e4fc06c",
+      "name": "Select com Expand"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "$select",
+              "value": "id,subject,clients,createdDate,createdBy,category,urgency,status,justification,owner,serviceFull,tags,resolvedIn,closedIn,slaSolutionTime,slaResponseTime,parentTickets,childrenTickets,customFieldValues"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        -180
+      ],
+      "id": "cd2ef704-5662-478c-b227-f13e3f3b604e",
+      "name": "Select"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/persons",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "$filter",
+              "value": "emails/any(e: e/email eq 'pedro@suthub.com')"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        -180
+      ],
+      "id": "c2a86ae0-3f7c-46ea-9cec-3a8afc2a1a53",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "content": "## POST: Em /tickets (criando ticket)",
+        "height": 280,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        40
+      ],
+      "typeVersion": 1,
+      "id": "b7584f66-c397-402e-b2fa-87d457ace8bb",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## GET: Filter em /tickets",
+        "height": 280,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "f6d1bfcc-e830-4673-9b13-e0dc69e0acfe",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "$filter",
+              "value": "id eq 822"
+            },
+            {
+              "name": "$select",
+              "value": "id,subject,status,serviceFirstLevelId,createdDate,clients,owner,createdBy,category,urgency,status,justification,owner,serviceFull,tags,resolvedIn,closedIn,slaSolutionTime,slaResponseTime,parentTickets,childrenTickets,customFieldValues"
+            },
+            {
+              "name": "$expand",
+              "value": "clients,owner"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        60,
+        -460
+      ],
+      "id": "b022a94d-4479-4baf-b7af-f7c65c0f7ce8",
+      "name": "Filter para obter o id do ticket"
+    },
+    {
+      "parameters": {
+        "content": "## POST: Em /tickets (criando ticket com + campos)",
+        "height": 280,
+        "width": 600
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        40
+      ],
+      "typeVersion": 1,
+      "id": "ebae5e50-f2d4-4d89-b826-60376189a255",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"type\": 2,\n    \"subject\": \"DEV Criando Ticket com campos Monitoramento/Alerta e Categogia com createdBy Pedro\",\n    \"category\": \"Problema\",\n    \"serviceFirstLevelId\": 1351440,\n    \"createdBy\": {\n        \"id\": \"70003777\"\n    },\n    \"clients\": [\n        {\n            \"id\": \"887430515\"\n        }\n    ],\n    \"actions\": [\n        {\n            \"type\": 2,\n            \"description\": \"DEV Descrição inicial do problema ou solicitação.\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        140
+      ],
+      "id": "ceeb1189-60ca-49cf-aad0-00d3cf646c68",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "content": "## POST: Incluir uma ação em ticket já existente em /tickets",
+        "height": 280,
+        "width": 680
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "d5007147-9cac-49ab-8f97-47199e79fe34",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "id",
+              "value": "822"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"actions\": [\n    {\n      \"type\": 2,\n      \"description\": \"Teste final de inserção de ação via PATCH.\",\n      \"createdBy\": {\n        \"id\": \"70003777\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        -440
+      ],
+      "id": "8784cd60-2763-489b-b3b9-df1418dba352",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "content": "## GET: Pesquisando em ações Em /tickets",
+        "height": 280,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        -260
+      ],
+      "typeVersion": 1,
+      "id": "f1fe672f-2228-4e2e-b580-8b7532f48c84",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "$filter",
+              "value": "=actions/any(a: contains(a/description, 'DEV Descrição inicial do problema ou solicitação.'))"
+            },
+            {
+              "name": "$select",
+              "value": "id,status,baseStatus"
+            },
+            {
+              "name": "$top",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        860,
+        -160
+      ],
+      "id": "e653e393-74cf-4af7-aebc-79be011b1e2b",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "content": "## \"baseStatus\": \"Stopped\", > Aberto\n## \"baseStatus\": \"InAttendance\", > Aberto\n## \"baseStatus\": \"New\", > Aberto",
+        "width": 540,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        580,
+        40
+      ],
+      "typeVersion": 1,
+      "id": "fd38a7ab-0599-4ea7-b519-01a82117ae55",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "url": "https://api.movidesk.com/public/v1/tickets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "b2faa92c-441b-42a4-9c72-1981234922fc"
+            },
+            {
+              "name": "$filter",
+              "value": "status eq 'Resolvido'"
+            },
+            {
+              "name": "$select",
+              "value": "id,subject,status,baseStatus,serviceFirstLevelId,createdDate,clients,owner,createdBy,category,urgency,status,justification,owner,serviceFull,tags,resolvedIn,closedIn,slaSolutionTime,slaResponseTime,parentTickets,childrenTickets,customFieldValues"
+            },
+            {
+              "name": "$expand",
+              "value": "clients,owner"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        -460
+      ],
+      "id": "44ecec13-2b60-43db-8339-d0e93da7f9a0",
+      "name": "Filter para obter o id do ticket1"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-12T20:21:23.558Z",
+  "versionId": "ea13b293-a889-4004-87d8-bf4b69945ccb"
+}
