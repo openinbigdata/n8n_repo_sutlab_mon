@@ -1,0 +1,617 @@
+{
+  "active": false,
+  "connections": {
+    "MySQL - Lê erros da última hora": {
+      "main": [
+        [
+          {
+            "node": "Escapando aspas simples na msg de erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escapando aspas simples na msg de erro": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Variables": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Lê erros da última hora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Erro conhecido?": {
+      "main": [
+        [
+          {
+            "node": "Conhecido ou desconhecido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conhecido ou desconhecido?": {
+      "main": [
+        [
+          {
+            "node": "Abre chamado para erro desconhecido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quatidade > 10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abre chamado para erro desconhecido": {
+      "main": [
+        [
+          {
+            "node": "Carrega erro desconhecido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quatidade > 10": {
+      "main": [
+        [
+          {
+            "node": "Abre chamado com qtde de erro > 10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abre chamado com qtde de erro > 10": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "Erro conhecido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-08-07T14:27:07.965Z",
+  "id": "YSn0h6E7C10vGnjK",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Erros desconhecidos - Latest v4",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n\t'Movimentos transacionais' as movimento,\n\t'Adesão' as processo, \n\tCASE\n\t\tWHEN mt.id_seguradora = 672 THEN 'Zurich'\n\t\tWHEN mt.id_seguradora = 671 THEN 'Cardif'\n\tEND as seguradora,\n\tmt.etapa, \n\tmt.status,  \t\n    REGEXP_REPLACE(\n      REGEXP_REPLACE(\n        REGEXP_REPLACE(\n          REGEXP_REPLACE(\n            mt.razao_status,'(\"timestamp\"\\\\s*:\\\\s*\")[0-9]{4}-[0-9]{2}-[0-9]{2}\\\\s[0-9]{2}:[0-9]{2}:[0-9]{2}(\")',\n            '\\\\1***\\\\2'\n          ),\n          '([0-9]{11})',\n          '***'\n        ),\n        '(CEP\\\\s+)([0-9]{8})',\n        '\\\\***'\n      ),\n      '([0-9]{1,3})\\\\s+anos',\n      '*** anos'\n    ) AS razao,\n\tcount(*) as quantidade_erros  \nFROM\n  `core-data-streams-prod-database`.movimentos_transacionais mt\nWHERE 1=1\n  AND mt.id_seguradora in (671, 672)\n  AND (\n  \ttrim(mt.razao_status) <> '' \n  \tand trim(mt.razao_status) is not null \n  \tand trim(mt.razao_status) <> 'emitido'\n  \tand trim(mt.razao_status) <> 'em processamento'\n  \t)\n  AND mt.timestamp_processamento >= NOW() - INTERVAL 1 HOUR\ngroup by\n\t1, 2, 3, 4, 5, 6\norder by\n\t7 desc;",
+        "options": {
+          "replaceEmptyStrings": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -1740,
+        -980
+      ],
+      "id": "b87d6bf2-1020-4212-869f-29c77930c152",
+      "name": "MySQL - Lê erros da última hora",
+      "credentials": {
+        "mySql": {
+          "id": "5YkbRXBaQCU0hyQs",
+          "name": "MySQL Mon"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2120,
+        -740
+      ],
+      "id": "b976cf4a-9ef3-402c-b2a1-e263cb8132dd",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// const seguradora = item.json.seguradora;\nconst erro = item.json.razao;\nconst quantidade_erros_source = item.json.quantidade_erros;\n\n// Escapa todas as aspas simples\nconst erroEscapado = erro.replace(/'/g, \"''\");\n\n// item.json.seguradora = seguradora;\nitem.json.erro_sql = erroEscapado;\nitem.json.quantidade_erros_source = quantidade_erros_source;\nreturn item;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1540,
+        -980
+      ],
+      "id": "5f6a5aca-ca34-4f3e-ae5e-791f3ee9cc92",
+      "name": "Escapando aspas simples na msg de erro"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29491a57-83b9-4c1d-80d6-ade7a5dea775",
+              "name": "email_movedesk",
+              "value": "atendimento@sutservices-solucoes-em-tecnologia-ltda.movidesk.com",
+              "type": "string"
+            },
+            {
+              "id": "e4424b08-f73a-47cc-94e8-98497b7c40e9",
+              "name": "threshould_conhecido",
+              "value": 10,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1940,
+        -980
+      ],
+      "id": "62a21102-0493-4790-bdf3-64d16a04e70d",
+      "name": "Variables"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2120,
+        -980
+      ],
+      "id": "fed68ca5-069a-477f-9d99-8921fec5a0b9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select \n  '{{ $json.movimento }}' as movimento,\n  '{{ $json.processo }}' as processo,\n  '{{ $json.seguradora }}'as seguradora,\n  '{{ $json.etapa }}' as etapa,\n  '{{ $json.status }}' as status,\n  '{{ $json.erro_sql }}'as erro,\n  {{ $json.quantidade_erros_source }} as quantidade_erros_source,\n  count(*) as quantidade_erros\nfrom \n  public.erros_conhecidos ec \nwhere \n  ec.movimento = '{{ $json.movimento }}'\n  and ec.processo = '{{ $json.processo }}'\n  and ec.seguradora = '{{ $json.seguradora }}'\n  and ec.etapa = '{{ $json.etapa }}'\n  and ec.status = '{{ $json.status }}'\n  and ec.erro = '{{ $json.erro_sql }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -880,
+        -980
+      ],
+      "id": "42e4f150-36e0-4baf-b978-17cfacad1a75",
+      "name": "Erro conhecido?",
+      "credentials": {
+        "postgres": {
+          "id": "P09H1er9n2eb0uAq",
+          "name": "Postgres Sutlab Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.quantidade_erros }}",
+                    "rightValue": "0",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9e642630-ab98-4119-aaeb-59750ba054e1"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Desconhecido"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "325efd98-4437-4deb-9daa-1af5811fe072",
+                    "leftValue": "={{ $json.quantidade_erros }}",
+                    "rightValue": "0",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Conhecido"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -680,
+        -980
+      ],
+      "id": "aa258359-7a17-425c-857a-0d7e6298ac89",
+      "name": "Conhecido ou desconhecido?"
+    },
+    {
+      "parameters": {
+        "fromEmail": "rgouvea@suthub.com",
+        "toEmail": "={{ $item(\"0\").$node[\"Variables\"].json[\"email_movedesk\"] }}",
+        "subject": "Erros desconhecidos",
+        "emailFormat": "text",
+        "text": "=Foi detectado na última hora em \"Críticas CSF\", um erro desconhecido.\n\nProcesso: Adesão\nSeguradora: {{ $json.seguradora }}\nEtapa: {{ $json.etapa }}\nErro: {{ $json.erro }}\nQuantidade: {{ $json.quantidade_erros_source }}\nPesquisa: = {{ $json.hash_do_erro }}\n\nDeveloper by Data Team\nCreated: 2025-07-31\nUpdated: 2025-07-31",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -420,
+        -1120
+      ],
+      "id": "4542cf75-3641-4fa3-8677-29075bd0b6ac",
+      "name": "Abre chamado para erro desconhecido",
+      "webhookId": "9bf7c7ab-98fa-4d84-b098-8289f200f40f",
+      "credentials": {
+        "smtp": {
+          "id": "490Ja5pa65ODxxXD",
+          "name": "SMTP Sutlab Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "erros_conhecidos",
+          "mode": "list",
+          "cachedResultName": "erros_conhecidos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "seguradora": "={{ $('Erro conhecido?').item.json.seguradora }}",
+            "erro": "={{ $('Erro conhecido?').item.json.erro }}",
+            "movimento": "={{ $('Conhecido ou desconhecido?').item.json.movimento }}",
+            "processo": "={{ $('Conhecido ou desconhecido?').item.json.processo }}",
+            "etapa": "={{ $('Conhecido ou desconhecido?').item.json.etapa }}",
+            "status": "={{ $('Conhecido ou desconhecido?').item.json.status }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "movimento",
+              "displayName": "movimento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processo",
+              "displayName": "processo",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seguradora",
+              "displayName": "seguradora",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "etapa",
+              "displayName": "etapa",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "erro",
+              "displayName": "erro",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data_criacao",
+              "displayName": "data_criacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -180,
+        -1120
+      ],
+      "id": "f59bba27-37da-4f1b-851d-f5de83e2b235",
+      "name": "Carrega erro desconhecido",
+      "credentials": {
+        "postgres": {
+          "id": "P09H1er9n2eb0uAq",
+          "name": "Postgres Sutlab Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "549aa180-f02d-4df1-9b32-618c7d431405",
+              "leftValue": "={{ $json.quantidade_erros_source }}",
+              "rightValue": "={{ $('Variables').item.json.threshould_conhecido }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -420,
+        -820
+      ],
+      "id": "af64ac46-4b5e-45f1-b1ab-b0b78ef7e6e6",
+      "name": "Quatidade > 10"
+    },
+    {
+      "parameters": {
+        "fromEmail": "=rgouvea@suthub.com",
+        "toEmail": "={{ $item(\"0\").$node[\"Variables\"].json[\"email_movedesk\"] }}",
+        "subject": "Erros conhecidos com quantidade acima de 10",
+        "emailFormat": "text",
+        "text": "=Foi detectado na última hora em \"Críticas CSF\", uma quantidade de erros conhecidos superior a {{ $('Variables').item.json.threshould_conhecido }}.\n\nProcesso: Adesão\nSeguradora: {{ $json.seguradora }}\nEtapa: {{ $json.etapa }} \nErro: {{ $json.erro }}\nQuantidade: {{ $json.quantidade_erros_source }}\nPesquisa: = {{ $json.hash_do_erro }}\nDeveloper by Data Team\nCreated: 2025-07-31\nUpdated: 2025-08-05",
+        "options": {
+          "ccEmail": "rgouvea@suthub.com"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -160,
+        -820
+      ],
+      "id": "7ec33749-11a0-4a9f-a8bf-7d1eaeb80ec4",
+      "name": "Abre chamado com qtde de erro > 10",
+      "webhookId": "0dba11c6-f93f-4f23-9bab-0b766f3714f4",
+      "credentials": {
+        "smtp": {
+          "id": "490Ja5pa65ODxxXD",
+          "name": "SMTP Sutlab Mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e17e16fd-35a8-4019-a56c-779ec585eb3a",
+              "name": "dadosParaHash",
+              "value": "={{ $json.movimento }}|{{ $json.processo }}|{{ $json.seguradora }}|{{ $json.etapa }}|{{ $json.status }}|{{ $json.razao }}|{{ $json.quantidade_erros }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1320,
+        -980
+      ],
+      "id": "e3d7ec2a-ebb1-4c7e-a1fe-765494a112b5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "value": "={{ $json.dadosParaHash }}",
+        "dataPropertyName": "hash_do_erro"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        -1100,
+        -980
+      ],
+      "id": "25adf170-e91d-47f5-b240-623d06f45dd3",
+      "name": "Crypto"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "tags": [
+    {
+      "createdAt": "2025-07-29T17:22:58.627Z",
+      "updatedAt": "2025-07-29T17:22:58.627Z",
+      "id": "IWuR2gsUJATZtiw5",
+      "name": "latest"
+    },
+    {
+      "createdAt": "2025-07-29T17:32:50.846Z",
+      "updatedAt": "2025-07-29T17:32:50.846Z",
+      "id": "fQHqEjQmqqubgutx",
+      "name": "monitoramento"
+    },
+    {
+      "createdAt": "2025-07-29T17:33:00.368Z",
+      "updatedAt": "2025-07-29T17:33:00.368Z",
+      "id": "Fn3RtlQfZGMdTm58",
+      "name": "prod"
+    },
+    {
+      "createdAt": "2025-07-31T18:18:44.803Z",
+      "updatedAt": "2025-07-31T18:18:44.803Z",
+      "id": "yffj8p12BK5O1xLr",
+      "name": "schedule"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-08-11T22:17:52.591Z",
+  "versionId": "7e1ab722-3d95-431d-a3b7-2cfc55e06a60"
+}
