@@ -1,0 +1,623 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get all workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all workflows": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Github parameters": {
+      "main": [
+        [
+          {
+            "node": "Get current repo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backup to Github": {
+      "main": [
+        [
+          {
+            "node": "Set Github parameters",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get current repo": {
+      "main": [
+        [
+          {
+            "node": "If backup file is too large",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If backup file is too large": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Compare version",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare version": {
+      "main": [
+        [
+          {
+            "node": "Check status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check status": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit existing file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create new file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get all workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-08-20T19:19:14.641Z",
+  "id": "ytxzeVrYoElFO7Xy",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        260
+      ],
+      "id": "86824128-99b5-4633-8746-2c2322a3c17d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $workflow.id }}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        100
+      ],
+      "id": "ebc6ad1d-aa3f-435e-88cb-c37aab63a5ea",
+      "name": "Execute Workflow"
+    },
+    {
+      "parameters": {
+        "content": "## Get for all workflows",
+        "height": 320,
+        "width": 1120
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "32763701-9ba5-4827-a1ff-89827923b940",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        380,
+        80
+      ],
+      "id": "c0e9c4aa-d772-42b4-971b-403ce7acb08f",
+      "name": "Get all workflows",
+      "credentials": {
+        "n8nApi": {
+          "id": "pfzV0BlGA9kGNMNw",
+          "name": "n8n account - sutlab mon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1cffc5fa-2461-4026-aa2c-0d121cd5efdf",
+              "name": "repo.owner",
+              "value": "openinbigdata",
+              "type": "string"
+            },
+            {
+              "id": "24b0dd7b-b74c-4dcc-af5f-82376aad7d24",
+              "name": "repo.name",
+              "value": "n8n_repo_sutlab_mon",
+              "type": "string"
+            },
+            {
+              "id": "73e8b9a8-51b8-49e5-825c-be2b01ac0868",
+              "name": "repo.path",
+              "value": "workflows/",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        460
+      ],
+      "id": "b6a94138-d4d9-4fb9-a71b-0946867318dd",
+      "name": "Set Github parameters"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $json.repo.owner }}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $json.repo.name }}",
+          "mode": "name"
+        },
+        "filePath": "={{ $json.repo.path }}{{ $('Backup to Github').item.json.id }}.json",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        620,
+        460
+      ],
+      "id": "3cac02ab-5a26-4334-88c6-b69f6a42d61b",
+      "name": "Get current repo",
+      "webhookId": "a2f9902b-5dc0-4838-a72a-873f73b55529",
+      "credentials": {
+        "githubApi": {
+          "id": "GrOw0ku6nxZfTTsN",
+          "name": "GitHub account - token"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        460
+      ],
+      "id": "8a57aa8c-0a85-4efe-9942-d088956eb16f",
+      "name": "Backup to Github"
+    },
+    {
+      "parameters": {
+        "content": "## Sub Workflow - Check for existing backups",
+        "height": 300,
+        "width": 1120,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        360
+      ],
+      "typeVersion": 1,
+      "id": "e78a0ad4-a1d0-4935-b9a6-b8f66b0aea0b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4fec6e4d-00d0-40a3-8674-44bfd774f3eb",
+              "leftValue": "{{ $json.content }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "92844985-b4b4-45b8-95d7-b56039e2bdc1",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        840,
+        460
+      ],
+      "id": "246d0272-ed4b-4704-b442-d73a709a38a1",
+      "name": "If backup file is too large"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        160,
+        800
+      ],
+      "id": "f80412d7-7dcc-4fed-b30f-787f080ec687",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "## Backup new or apply changes",
+        "height": 340,
+        "width": 1120,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        680
+      ],
+      "typeVersion": 1,
+      "id": "92b3fd33-5819-42fa-ba3e-f48d2dec4a55",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const orderJsonKeys = (jsonObj) => {\n  const ordered = {};\n  Object.keys(jsonObj).sort().forEach(key => {\n    ordered[key] = jsonObj[key];\n  });\n  return ordered;\n}\n\n// Check if file returned with content\nif (Object.keys($input.all()[0].json).includes(\"content\")) {\n  // Decode base64 content and parse JSON\n  const origWorkflow = JSON.parse(Buffer.from($input.all()[0].json.content, 'base64').toString());\n  const n8nWorkflow = $input.all()[1].json;\n\n  // Order JSON objects\n  const orderedOriginal = orderJsonKeys(origWorkflow);\n  const orderedActual = orderJsonKeys(n8nWorkflow);\n\n  // Determine difference\n  if (JSON.stringify(orderedOriginal) === JSON.stringify(orderedActual)) {\n    $input.all()[0].json.github_status = \"same\";\n  } else {\n    $input.all()[0].json.github_status = \"different\";\n    $input.all()[0].json.n8n_data_string = JSON.stringify(orderedActual, null, 2);\n  }\n  $input.all()[0].json.content_decoded = orderedOriginal;\n}\n// No file returned / new workflow\nelse if (Object.keys($input.all()[0].json).includes(\"data\")) {\n  const origWorkflow = JSON.parse($input.all()[0].json.data);\n  const n8nWorkflow = $input.all()[1].json;\n\n  // Order JSON objects\n  const orderedOriginal = orderJsonKeys(origWorkflow);\n  const orderedActual = orderJsonKeys(n8nWorkflow);\n\n  // Determine difference\n  if (JSON.stringify(orderedOriginal) === JSON.stringify(orderedActual)) {\n    $input.all()[0].json.github_status = \"same\";\n  } else {\n    $input.all()[0].json.github_status = \"different\";\n    $input.all()[0].json.n8n_data_string = JSON.stringify(orderedActual, null, 2);\n  }\n  $input.all()[0].json.content_decoded = orderedOriginal;\n} \nelse {\n  // Order JSON object\n  const n8nWorkflow = $input.all()[1].json;\n  const orderedActual = orderJsonKeys(n8nWorkflow);\n\n  // Proper formatting\n  $input.all()[0].json.github_status = \"new\";\n  $input.all()[0].json.n8n_data_string = JSON.stringify(orderedActual, null, 2);\n}\n\n// Return items\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        800
+      ],
+      "id": "22e6a3eb-dc97-4291-82c0-529c0fa81ff2",
+      "name": "Compare version"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.github_status }}",
+                    "rightValue": "same",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "e2ea58c5-a563-4bbd-acdb-9d59fe262536"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "0"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0092ab03-b828-4e1b-80fd-5d26d3ff7722",
+                    "leftValue": "={{ $json.github_status }}",
+                    "rightValue": "different",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6a5e39b3-1bbf-4d23-9e36-393da55c8de1",
+                    "leftValue": "={{ $json.github_status }}",
+                    "rightValue": "new",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "2"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        600,
+        800
+      ],
+      "id": "4d1b6d54-e5a7-4f54-b3f6-d2d7d965f170",
+      "name": "Check status"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $('Set Github parameters').item.json.repo.owner }}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $('Set Github parameters').item.json.repo.name }}",
+          "mode": "name"
+        },
+        "filePath": "={{ $('Set Github parameters').item.json.repo.path }}{{ $('Backup to Github').first().json.id }}.json",
+        "fileContent": "={{ $json.n8n_data_string }}",
+        "commitMessage": "={{ $('Backup to Github').item.json.name }} ({{ $json.github_status }})"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        820,
+        700
+      ],
+      "id": "66eeca29-9190-4bec-b820-a08e708e160a",
+      "name": "Edit existing file",
+      "webhookId": "a8a4f18c-fa4c-4527-826b-1a5e7f6a884c",
+      "credentials": {
+        "githubApi": {
+          "id": "GrOw0ku6nxZfTTsN",
+          "name": "GitHub account - token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $('Set Github parameters').item.json.repo.owner }}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $('Set Github parameters').item.json.repo.name }}",
+          "mode": "name"
+        },
+        "filePath": "={{ $('Set Github parameters').item.json.repo.path }}{{ $('Backup to Github').first().json.id }}.json",
+        "fileContent": "={{ $json.n8n_data_string }}",
+        "commitMessage": "={{ $('Backup to Github').item.json.name }} ({{ $json.github_status }})"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        820,
+        900
+      ],
+      "id": "ecc5b320-853b-4370-b572-1e323df31e73",
+      "name": "Create new file",
+      "webhookId": "a8a4f18c-fa4c-4527-826b-1a5e7f6a884c",
+      "credentials": {
+        "githubApi": {
+          "id": "GrOw0ku6nxZfTTsN",
+          "name": "GitHub account - token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        600,
+        60
+      ],
+      "id": "27810738-b20a-457e-835f-1b73756abfce",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 60
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        40,
+        80
+      ],
+      "id": "89cbd4a6-991a-4f11-932e-f9e3ff3b8750",
+      "name": "Schedule Trigger",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-20T19:20:52.986Z",
+  "versionId": "42c85b0d-04b3-44b7-a09f-d7a4cd0f7bcb"
+}
